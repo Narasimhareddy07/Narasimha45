@@ -1,202 +1,73 @@
-<!DOCTYPE html>
 <html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hostel Leave System</title>
-    <link rel="stylesheet" href="stylesheet/v1.css">
-    <script src="javascript/drb.js" defer></script>
+    <title>Admin | HLS</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="main.js" defer></script>
+    <script src="adminEntry.js" defer></script>
+
 </head>
 
-<body onload="checkInUserMainPage()" class="dashboard">
+<body id="adminPanel">
 
-    <main>
-        <small>Welcome</small>
-        <h1 id="txtName">YOUR NAME</h1>
-        <div class="grid">
-            <span>
-                <label for="txtPhone">Phone : </label>
-                <h3 id="txtPhone">+91 XXXXXXXXXX</h3>
-            </span>
-            <span>
-                <label for="txtAddress">Address : </label>
-                <h3 id="txtAddress">Andhra Pradesh</h3>
-            </span>
-            <span>
-                <label for="txtGender">Gender : </label>
-                <h3 id="txtGender">XXX</h3>
-            </span>
-             <span>
-                <label for="txtHostelID">Email : </label>
-                <h3 id="txtHostelID">naraxxx@gmail.com</h3>
-             </span>
-             <br>
-            <span>
-                <label for="txtHostelID">Hostel ID : </label>
-                <h3 id="txtHostelID">000000000</h3>
-            </span>
-            <span>
-                <label for="txtHostelID">Register Number : </label>
-                <h3 id="txtHostelID">XXXX</h3>
-            </span>
-            <span>
-                <label for="txtHostelID">Room Number : </label>
-                <h3 id="txtHostelID">XX</h3>
-            </span>
+    <nav>
+        <h2>Admin Panel</h2>
+        <div class="btns">
+            <label class="btn red" onclick="logoutFromAdmin();">Logout</label>
         </div>
-    </main>
+    </nav>
 
-    <section class="container" id="reqContainer">
-    </section>
 
-    <div class="buttonCTN">
-        <button onclick="reDirect('requestLeave.html')">Request a leave</button>
-        <button onclick="logoutFromHere()" class="btn-red">Logout</button>
+    <div class="counts">
+        <div class="container">
+            <div class="block">
+                <p>Total Students:</p>
+                <h1 id="lbTotalStudents">0</h1>
+            </div>
+            <div class="block">
+                <p>On Leave:</p>
+                <h1 id="lbOnLeave">0</h1>
+            </div>
+            <div class="block">
+                <p>Pending Requests:</p>
+                <h1 id="lbLeaveRequests">0</h1>
+            </div>
+            <div class="block">
+                <p>Declined Requests:</p>
+                <h1 id="lbDeclinedRequests">0</h1>
+            </div>
+        </div>
+        <div class="btns">
+            <label class="btn green" onclick="reDirect('approved.html');">Request Approved</label>
+            <label class="btn btn-transparent" onclick="reDirect('decline.html');">Request Declined</label>
+            <label class="btn btn-transparent" onclick="reDirect('totalStudents.html');">Total Students</label>
+        </div>
+        <br>
     </div>
 
-    <script>
-        const deleteRequest = (idR) => {
-            if (confirm('Are you sure you want to remove?')) {
-                fetch("API/deleteRequest.php", {
-                        method: "POST",
-                        headers: {
-                            "Content-type": "application/json",
-                        },
-                        body: JSON.stringify({
-                            id: idR,
-                        }),
-                    })
-                    .then((res) => {
-                        if (!res.ok) {
-                            console.log("API url not found !");
-                        } else {
-                            return res.text();
-                        }
-                    })
-                    .then((data) => {
-                        alert(data);
-                        window.location.reload();
-                    })
-                    .catch((err) => {
-                        console.error(err);
-                    });
+    <div class="search">
 
-            }
+        <label>Search with phone number :</label>
+        <input type="search" class="dtxt" maxlength="10" id="txtSearchRequest" oninput="checkNumber(this);"
+            placeholder="4358974958">
+        <!-- <div class="btn green novisible" id="btnSearch">
+            <svg style="margin-left: 4px;" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24"
+                width="24px" fill="#fff">
+                <path d="M0 0h24v24H0V0z" fill="none" />
+                <path
+                    d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" />
+            </svg>
+        </div> -->
+    </div>
 
-        };
+    <div id="searchRes"></div>
+    <div id="reqContainer">
+        <p class="requestNoText">Please wait...</p>
+    </div>
 
-        let fetchLeaveRequests = () => {
-            fetch('API/getRequests.php', {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    phone: localStorage.getItem("usernameRAW"),
-                }),
-            }).then(res => {
-                if (!res.ok) console.error("There was an error : " + res.text());
-                else return res.json();
-            }).then(data => {
-                if (data[0] != 0) {
-                    let dispalyTemplate = `
-                    <h2 class="reqText">Requests : </h2>
-                    `;
-                    data.forEach(item => {
-                        let drb_status = "";
-                        dispalyTemplate += `
-                        <div class="request">
-                            <span>
-                                <label for="txtIssueDate">ID : </label>
-                                <h3 id="txtIssueDate">${item.id}</h3>
-                            </span>
-                            <span>
-                                <label for="txtIssueDate">Issue Date : </label>
-                                <h3 id="txtIssueDate">${item.issue_date}</h3>
-                            </span>
-                            <span>
-                                <label for="txtDate">Date : </label>
-                                <h3 id="txtDate">${item.d_from} to ${item.d_to}</h3>
-                            </span>
-                            <span>
-                                <label for="txtPurpose">Purpose : </label>
-                                <h3 id="txtPurpose">${item.purpose}</h3>
-                            </span>
-                            <span>
-                                <label for="txtStatus">Status : </label>
-                                <h3 id="txtStatus" class="
-                        `;
-                        if (item.status == 0) {
-                            drb_status = "Pending";
-                            dispalyTemplate += `txt-warning`;
-                        } else if (item.status > 0) {
-                            drb_status = "Approved";
-                            dispalyTemplate += `txt-success`;
-                        } else if (item.status < 0) {
-                            drb_status = "Declined";
-                            dispalyTemplate += `txt-danger`;
-                        }
-                        dispalyTemplate +=
-                            `   ">${drb_status}</h3>
-                            </span>
-                            <span>
-                                <h3 id="btnAction" onclick="deleteRequest(${item.id})" class="btn_link">
-                                    Remove Request
-                                </h3>
-                            </span>
-                        </div>
-                        `;
-                    });
-                    document.getElementById("reqContainer").innerHTML = dispalyTemplate;
-                }
-            }).catch(err => {
-                console.error("There was a problem in the Code : " + err);
-            });
-        };
-
-        (async () => {
-
-            /* Fetching Student Details */
-
-            await fetch('API/getUserDetails.php', {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    phone: localStorage.getItem("usernameRAW"),
-                }),
-            }).then(res => {
-                if (!res.ok) console.error("There was an error : " + res.text());
-                else return res.json();
-            }).then(data => {
-                if (data[0] == 0) {
-                    alert("Credentials are wrong. Please login again.");
-                    logoutFromHere();
-                } else {
-                    data = data[0][0];
-                    elem("txtName").innerHTML = data.name;
-                    elem("txtPhone").innerHTML = "+91 " + data.phone;
-                    elem("txtAddress").innerHTML = data.address;
-                    elem("txtGender").innerHTML = data.gender;
-                    elem("txtHostelID").innerHTML = data.hostel_id;
-                }
-            }).catch(err => {
-                console.error("There was a problem in the Code : " + err);
-            });
-
-
-            /* Fetching Leave Requests */
-            await fetchLeaveRequests();
-        })();
-
-        setInterval(() => {
-            fetchLeaveRequests();
-        }, 3000);
-
-    </script>
 </body>
 
 </html>

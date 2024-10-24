@@ -5,15 +5,25 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title> Student Hostel Leave System</title>
-    <link rel="stylesheet" href="stylesheet/v1.css">
-    <script src="javascript/drb.js" defer></script>
-    <script src="javascript/entry.js"></script>
+    <title>Hostel Leave System</title>
+    <link rel="stylesheet" href="../stylesheet/v1.css">
+    <script src="main.js" defer></script>
 </head>
 
-<body class="splash">
-    <h1 class="logoText">SHLS</h1>
-    <p>- - Hostel Leave System - -</p>
+<body class="login">
+    <h1>Hostel Leave System</h1>
+
+    <br>
+    <form id="form-admin-log" class="form">
+        <label for="txtUser">Email : </label>
+        <input type="tel" id="txtUser" class="txt" oninput="checkText(this)" maxlength="50"
+            placeholder="example@hls.com" required />
+        <label for="txtPass">Password : </label>
+        <input type="password" id="txtPass" class="txt" placeholder="abc@12" required />
+        <button type="submit">Login as admin</button>
+    </form>
+    <br><br>
+    <a href="../login.html">Login as Student</a>
 </body>
 
 </html>
